@@ -1,3 +1,3 @@
 # Ansible Collection - cmdcentral.printing
 
-Documentation for the collection.
+Ansible role collection for managing a 3D printing Raspberry Pi
