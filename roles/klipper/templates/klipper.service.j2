@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Starts klipper on startup
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User={{ user_config.username }}
+Group={{ user_config.group }}
+
+RemainAfterExit=yes
+
+# create /var/run/klipper
+RuntimeDirectory=klipper
+WorkingDirectory={{ base_dir }}
+
+ExecStart={{ base_dir }}/klipper/venv/bin/python {{ base_dir }}/klipper/repo/klippy/klippy.py {{ config_file }} -l {{ log_config.filename }} -a {{ uds_path }}

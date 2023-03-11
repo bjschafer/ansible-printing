@@ -1,0 +1,73 @@
+---
+# prereqs
+# https://github.com/Klipper3d/klipper/blob/master/scripts/install-octopi.sh
+# TODO split this out based on platform
+- name: install packages (ubuntu/debian)
+  ansible.builtin.apt:
+    pkg:
+      - build-essential
+      - python3-virtualenv
+      - python3-dev
+      - libffi-dev
+      - libncurses-dev
+      - git
+
+- name: create group
+  ansible.builtin.group:
+    name: "{{ user_config.group }}"
+
+- name: create user
+  ansible.builtin.user:
+    name: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+    groups: "{{ user_config.additional_groups }}"
+    append: true
+    create_home: false
+    home: "{{ base_dir }}"
+    system: true
+
+- name: create directory structure
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+  loop:
+    - "{{ base_dir }}"
+    - "{{ base_dir }}/klipper"
+    - "{{ base_dir }}/config"
+
+- name: clone klipper repo
+  ansible.builtin.git:
+    repo: "{{ repo_path }}"
+    dest: "{{ base_dir }}/klipper/repo"
+    update: true
+  become: true
+  become_user: "{{ user_config.username }}"
+
+- name: create virtualenv
+  ansible.builtin.pip:
+    virtualenv: "{{ base_dir }}/klipper/venv"
+    requirements: "{{ base_dir }}/klipper/repo/scripts/klippy-requirements.txt"
+  become: true
+  become_user: "{{ user_config.username }}"
+
+- name: create systemd unit file
+  ansible.builtin.template:
+    src: klipper.service.j2
+    dest: /etc/systemd/system/klipper.service
+  notify: restart klipper
+
+- name: enable systemd unit
+  ansible.builtin.systemd:
+    daemon_reload: true
+    enabled: true
+    name: klipper.service
+  notify: restart klipper
+# TODO configure virtual_sdcard path
+
+# presumes logrotate is installed/configured otherwise
+- name: setup logrotate
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: /etc/logrotate.d/klipper
