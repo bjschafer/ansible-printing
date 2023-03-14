@@ -1,2 +1,5 @@
 ---
-# handlers file for moonraker
+- name: restart moonraker
+  ansible.builtin.systemd:
+    name: moonraker
+    state: restarted

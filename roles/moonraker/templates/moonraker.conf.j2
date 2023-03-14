@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+[server]
+# Bind server defaults to 0.0.0.0, port 7125
+klippy_uds_address: {{ klipper.uds_path }}
+
+[authorization]
+trusted_clients:
+{% for ip in moonraker.trusted_client_ips %}
+ {{ ip }}
+{% endfor %}
+cors_domains:
+{% for domain in moonraker.cors_domains %}
+  {{ domain }}
+{% endfor %}
+
+{% if moonraker.octoprint_compat %}
+# Enable OctoPrint compatibility for Slicer uploads
+# Supports Cura, Slic3r, and Slic3r dervivatives
+# (PrusaSlicer, SuperSlicer)
+[octoprint_compat]
+{% endif %}

@@ -9,7 +9,7 @@ user_config:
     - dialout
 
 log_config:
-  filename: "/var/run/klipper/klippy.log"
+  filename: "/var/log/klipper/klippy.log"
   configure_logrotate: true
 
 # /var/run/$service autocreated by systemd

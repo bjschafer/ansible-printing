@@ -1,2 +1,28 @@
 ---
-# defaults file for moonraker
+base_dir: "/opt/3dprinter"
+
+user_config:
+  username: "klipper"
+  group: "3dprinter"
+  additional_groups:
+    - dialout
+
+log_config:
+  filename: "/var/log/klipper/moonraker.log"
+  configure_logrotate: true
+
+klipper:
+  uds_path: "/var/run/klipper/klippy.socket"
+  config_file: "{{ base_dir }}/config/printer.cfg"
+
+moonraker:
+  trusted_client_ips:
+    - "10.0.0.0/8"
+    - "172.16.0.0/20"
+    - "192.168.0.0/16"
+  cors_domains:
+    - "http://{{ ansible_hostname }}"
+  octoprint_compat: true
+  config_file: "{{ base_dir }}/config/moonraker.conf"
+
+repo_path: "https://github.com/Arksine/moonraker.git"

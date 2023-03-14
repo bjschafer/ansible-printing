@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+{{ log_config.filename }}
+{{ "{" }}
+    rotate 7
+    daily
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0644 {{ user_config.username }} {{ user_config.group }}
+{{ "}" }}
