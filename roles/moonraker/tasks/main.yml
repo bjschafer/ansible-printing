@@ -1,59 +1,49 @@
 ---
+- name: Include common role
+  ansible.builtin.import_role:
+    name: Common
+
 # prereqs
 # TODO split this out based on platform
-- name: install packages (ubuntu/debian)
+- name: Install packages (ubuntu/debian)
   ansible.builtin.apt:
     pkg:
       - python3-virtualenv
       - git
 
-- name: create group
-  ansible.builtin.group:
-    name: "{{ user_config.group }}"
-
-- name: create user
-  ansible.builtin.user:
-    name: "{{ user_config.username }}"
-    group: "{{ user_config.group }}"
-    groups: "{{ user_config.additional_groups }}"
-    append: true
-    create_home: false
-    home: "{{ base_dir }}"
-    system: true
-
-- name: create directory structure
+- name: Create directory structure
   ansible.builtin.file:
     state: directory
     path: "{{ item }}"
-    owner: "{{ user_config.username }}"
-    group: "{{ user_config.group }}"
+    owner: "{{ common.user_config.username }}"
+    group: "{{ common.user_config.group }}"
   loop:
-    - "{{ base_dir }}"
-    - "{{ base_dir }}/moonraker"
-    - "{{ base_dir }}/data"
+    - "{{ common.base_dir }}"
+    - "{{ common.base_dir }}/moonraker"
+    - "{{ common.base_dir }}/data"
 
-- name: clone moonraker repo
+- name: Clone moonraker repo
   ansible.builtin.git:
     repo: "{{ repo_path }}"
-    dest: "{{ base_dir }}/moonraker/repo"
+    dest: "{{ common.base_dir }}/moonraker/repo"
     update: true
   become: true
   become_user: "{{ user_config.username }}"
 
-- name: create virtualenv
+- name: Create virtualenv
   ansible.builtin.pip:
-    virtualenv: "{{ base_dir }}/moonraker/venv"
-    requirements: "{{ base_dir }}/moonraker/repo/scripts/moonraker-requirements.txt"
+    virtualenv: "{{ common.base_dir }}/moonraker/venv"
+    requirements: "{{ common.base_dir }}/moonraker/repo/scripts/moonraker-requirements.txt"
   become: true
-  become_user: "{{ user_config.username }}"
+  become_user: "{{ common.user_config.username }}"
 
-- name: create systemd unit file
+- name: Create systemd unit file
   ansible.builtin.template:
     src: moonraker.service.j2
     dest: /etc/systemd/system/moonraker.service
   notify: restart moonraker
 
-- name: enable systemd unit
+- name: Enable systemd unit
   ansible.builtin.systemd:
     daemon_reload: true
     enabled: true
@@ -61,17 +51,15 @@
     name: moonraker.service
   notify: restart moonraker
 
-# presumes logrotate is installed/configured otherwise
-- name: setup logrotate
-  ansible.builtin.template:
-    src: logrotate.j2
-    dest: /etc/logrotate.d/moonraker
-  when: "log_config.configure_logrotate"
+- name: Setup logrotate
+  ansible.builtin.include_role:
+    name: Common
+    tasks_from: logrotate
 
-- name: configure moonraker
+- name: Configure moonraker
   ansible.builtin.template:
     src: moonraker.conf.j2
     dest: "{{ moonraker.config_file }}"
-    owner: "{{ user_config.username }}"
-    group: "{{ user_config.group }}"
+    owner: "{{ common.user_config.username }}"
+    group: "{{ common.user_config.group }}"
   notify: restart moonraker

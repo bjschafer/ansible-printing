@@ -1,19 +1,8 @@
 ---
-base_dir: "/opt/3dprinter"
-
-user_config:
-  username: "klipper"
-  group: "3dprinter"
-  additional_groups:
-    - dialout
-
 log_config:
   filename: "/var/log/klipper/moonraker.log"
   configure_logrotate: true
-
-klipper:
-  uds_path: "/var/run/klipper/klippy.socket"
-  config_file: "{{ base_dir }}/config/printer.cfg"
+  name: moonraker
 
 moonraker:
   trusted_client_ips:

@@ -1,4 +1,4 @@
 all:
   hosts:
     ansible-klipper-test:
-      ansible_host: 10.0.11.102
+      ansible_host: 10.0.11.12

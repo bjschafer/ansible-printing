@@ -1,0 +1,11 @@
+---
+- name: Install logrotate
+  ansible.builtin.apt:
+    pkg:
+      - logrotate
+
+- name: Setup logrotate
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: /etc/logrotate.d/{{ name }}
+  when: "log_config.name"

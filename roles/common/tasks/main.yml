@@ -1,0 +1,14 @@
+---
+- name: Create group
+  ansible.builtin.group:
+    name: "{{ user_config.group }}"
+
+- name: Create user
+  ansible.builtin.user:
+    name: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+    groups: "{{ user_config.additional_groups }}"
+    append: true
+    create_home: false
+    home: "{{ base_dir }}"
+    system: true

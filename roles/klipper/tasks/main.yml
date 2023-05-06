@@ -1,8 +1,12 @@
 ---
+- name: Include common role
+  ansible.builtin.import_role:
+    name: common
+
 # prereqs
 # https://github.com/Klipper3d/klipper/blob/master/scripts/install-octopi.sh
 # TODO split this out based on platform
-- name: install packages (ubuntu/debian)
+- name: Install packages (ubuntu/debian)
   ansible.builtin.apt:
     pkg:
       - build-essential
@@ -12,53 +16,39 @@
       - libncurses-dev
       - git
 
-- name: create group
-  ansible.builtin.group:
-    name: "{{ user_config.group }}"
-
-- name: create user
-  ansible.builtin.user:
-    name: "{{ user_config.username }}"
-    group: "{{ user_config.group }}"
-    groups: "{{ user_config.additional_groups }}"
-    append: true
-    create_home: false
-    home: "{{ base_dir }}"
-    system: true
-
-- name: create directory structure
+- name: Create directory structure
   ansible.builtin.file:
     state: directory
     path: "{{ item }}"
-    owner: "{{ user_config.username }}"
-    group: "{{ user_config.group }}"
+    owner: "{{ common.user_config.username }}"
+    group: "{{ common.user_config.group }}"
   loop:
-    - "{{ base_dir }}"
-    - "{{ base_dir }}/klipper"
-    - "{{ base_dir }}/config"
+    - "{{ common.base_dir }}"
+    - "{{ common.base_dir }}/klipper"
+    - "{{ common.base_dir }}/config"
 
-- name: clone klipper repo
+- name: Clone klipper repo
   ansible.builtin.git:
     repo: "{{ repo_path }}"
-    dest: "{{ base_dir }}/klipper/repo"
+    dest: "{{ common.base_dir }}/klipper/repo"
     update: true
   become: true
-  become_user: "{{ user_config.username }}"
+  become_user: "{{ common.user_config.username }}"
 
-- name: create virtualenv
+- name: Create virtualenv
   ansible.builtin.pip:
-    virtualenv: "{{ base_dir }}/klipper/venv"
-    requirements: "{{ base_dir }}/klipper/repo/scripts/klippy-requirements.txt"
+    virtualenv: "{{ common.base_dir }}/klipper/venv"
+    requirements: "{{ common.base_dir }}/klipper/repo/scripts/klippy-requirements.txt"
   become: true
-  become_user: "{{ user_config.username }}"
+  become_user: "{{ common.user_config.username }}"
 
-- name: create systemd unit file
+- name: Create systemd unit file
   ansible.builtin.template:
     src: klipper.service.j2
     dest: /etc/systemd/system/klipper.service
   notify: restart klipper
 
-- name: enable systemd unit
+- name: Enable systemd unit
   ansible.builtin.systemd:
     daemon_reload: true
     enabled: true
@@ -66,9 +56,7 @@
   notify: restart klipper
 # TODO configure virtual_sdcard path
 
-# presumes logrotate is installed/configured otherwise
-- name: setup logrotate
-  ansible.builtin.template:
-    src: logrotate.j2
-    dest: /etc/logrotate.d/klipper
-  when: "log_config.configure_logrotate"
+- name: Setup logrotate
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: logrotate
