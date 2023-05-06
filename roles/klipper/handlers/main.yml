@@ -1,7 +1,7 @@
 ---
 # handlers file for klipper
 
-- name: restart klipper
+- name: Restart klipper
   ansible.builtin.systemd:
     name: klipper
     state: restarted

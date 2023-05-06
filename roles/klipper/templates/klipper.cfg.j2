@@ -1,0 +1,14 @@
+{%- if config.custom_file_path or config.overwrite %}
+{{ ansible_managed }}
+{%- endif %}
+{% include base_printer_cfg.stat.path %}
+{%- if config.extra_file %}
+{% include config.extra_file %}
+{%- endif %}
+
+{%- if virtual_sdcard_path %}
+# BEGIN {{ ansible_managed }}
+[virtual_sdcard]
+path: {{ virtual_sdcard_path }}
+# END {{ ansible_managed }}
+{%- endif %}

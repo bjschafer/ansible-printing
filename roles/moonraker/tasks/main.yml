@@ -17,12 +17,13 @@
     path: "{{ item }}"
     owner: "{{ common.user_config.username }}"
     group: "{{ common.user_config.group }}"
+    mode: "775"
   loop:
     - "{{ common.base_dir }}"
     - "{{ common.base_dir }}/moonraker"
     - "{{ common.base_dir }}/data"
 
-- name: Clone moonraker repo
+- name: Clone moonraker repo # noqa latest
   ansible.builtin.git:
     repo: "{{ repo_path }}"
     dest: "{{ common.base_dir }}/moonraker/repo"
@@ -41,6 +42,7 @@
   ansible.builtin.template:
     src: moonraker.service.j2
     dest: /etc/systemd/system/moonraker.service
+    mode: "664"
   notify: restart moonraker
 
 - name: Enable systemd unit
@@ -62,4 +64,5 @@
     dest: "{{ moonraker.config_file }}"
     owner: "{{ common.user_config.username }}"
     group: "{{ common.user_config.group }}"
+    mode: "664"
   notify: restart moonraker

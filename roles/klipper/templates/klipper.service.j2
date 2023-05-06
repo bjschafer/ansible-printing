@@ -17,4 +17,4 @@ RemainAfterExit=yes
 RuntimeDirectory=klipper
 WorkingDirectory={{ common.base_dir }}
 
-ExecStart={{ common.base_dir }}/klipper/venv/bin/python {{ common.base_dir }}/klipper/repo/klippy/klippy.py {{ config_file }} -l {{ log_config.filename }} -a {{ uds_path }}
+ExecStart={{ common.base_dir }}/klipper/venv/bin/python {{ common.base_dir }}/klipper/repo/klippy/klippy.py {{ common.config_file }} -l {{ log_config.filename }} -a {{ uds_path }}

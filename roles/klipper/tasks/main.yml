@@ -22,13 +22,14 @@
     path: "{{ item }}"
     owner: "{{ common.user_config.username }}"
     group: "{{ common.user_config.group }}"
+    mode: "644"
   loop:
     - "{{ common.base_dir }}"
     - "{{ common.base_dir }}/klipper"
     - "{{ common.base_dir }}/config"
 
 - name: Clone klipper repo
-  ansible.builtin.git:
+  ansible.builtin.git: # noqa latest
     repo: "{{ repo_path }}"
     dest: "{{ common.base_dir }}/klipper/repo"
     update: true
@@ -42,10 +43,38 @@
   become: true
   become_user: "{{ common.user_config.username }}"
 
+- name: Check for base printer.cfg
+  ansible.builtin.stat:
+    path: "{{ repo_path }}/config/{{ config.base_file }}"
+  when: "config.custom_file_path is not defined"
+  register: base_printer_cfg
+
+- name: Configure basic printer.cfg
+  ansible.builtin.template:
+    src: klipper.cfg.j2
+    dest: "{{ common.config_file }}"
+    mode: "644"
+    force: "{{ config.overwrite }}"
+  notify: restart klipper
+  when:
+    - "config.custom_file_path is not defined"
+    - "base_printer_cfg.stat.exists"
+
+# FUTURE IMPROVEMENT: permit fetching file from a URL.
+- name: Setup custom printer.cfg
+  ansible.builtin.template:
+    src: "{{ config.custom_file_path }}"
+    dest: "{{ common.config_file }}"
+    mode: "644"
+    force: "{{ config.overwrite }}"
+  notify: restart klipper
+  when: "config.custom_file_path is defined"
+
 - name: Create systemd unit file
   ansible.builtin.template:
     src: klipper.service.j2
     dest: /etc/systemd/system/klipper.service
+    mode: "644"
   notify: restart klipper
 
 - name: Enable systemd unit
@@ -54,7 +83,6 @@
     enabled: true
     name: klipper.service
   notify: restart klipper
-# TODO configure virtual_sdcard path
 
 - name: Setup logrotate
   ansible.builtin.include_role:
