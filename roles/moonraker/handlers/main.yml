@@ -1,5 +1,5 @@
 ---
-- name: restart moonraker
+- name: Restart moonraker
   ansible.builtin.systemd:
     name: moonraker
     state: restarted

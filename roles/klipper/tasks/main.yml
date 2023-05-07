@@ -46,7 +46,7 @@
 - name: Check for base printer.cfg
   ansible.builtin.stat:
     path: "{{ repo_path }}/config/{{ config.base_file }}"
-  when: "config.custom_file_path is not defined"
+  when: "config.custom_file_path is not defined or not config.custom_file_path"
   register: base_printer_cfg
 
 - name: Configure basic printer.cfg
@@ -55,9 +55,9 @@
     dest: "{{ config_file }}"
     mode: "644"
     force: "{{ config.overwrite }}"
-  notify: restart klipper
+  notify: Restart klipper
   when:
-    - "config.custom_file_path is not defined"
+    - "config.custom_file_path is not defined or not config.custom_file_path"
     - "base_printer_cfg.stat.exists"
 
 # FUTURE IMPROVEMENT: permit fetching file from a URL.
@@ -67,22 +67,22 @@
     dest: "{{ config_file }}"
     mode: "644"
     force: "{{ config.overwrite }}"
-  notify: restart klipper
-  when: "config.custom_file_path is defined"
+  notify: Restart klipper
+  when: "config.custom_file_path is defined and config.custom_file_path"
 
 - name: Create systemd unit file
   ansible.builtin.template:
     src: klipper.service.j2
     dest: /etc/systemd/system/klipper.service
     mode: "644"
-  notify: restart klipper
+  notify: Restart klipper
 
 - name: Enable systemd unit
   ansible.builtin.systemd:
     daemon_reload: true
     enabled: true
     name: klipper.service
-  notify: restart klipper
+  notify: Restart klipper
 
 - name: Setup logrotate
   ansible.builtin.include_role:

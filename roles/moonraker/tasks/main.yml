@@ -43,7 +43,7 @@
     src: moonraker.service.j2
     dest: /etc/systemd/system/moonraker.service
     mode: "664"
-  notify: restart moonraker
+  notify: Restart moonraker
 
 - name: Enable systemd unit
   ansible.builtin.systemd:
@@ -51,7 +51,7 @@
     enabled: true
     state: started
     name: moonraker.service
-  notify: restart moonraker
+  notify: Restart moonraker
 
 - name: Setup logrotate
   ansible.builtin.include_role:
@@ -65,4 +65,4 @@
     owner: "{{ user_config.username }}"
     group: "{{ user_config.group }}"
     mode: "664"
-  notify: restart moonraker
+  notify: Restart moonraker

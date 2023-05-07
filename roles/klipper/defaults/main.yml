@@ -14,6 +14,6 @@ virtual_sdcard_path: "{{ base_dir }}/config/data/sdcard"
 # the base setup will configure a super basic printer.cfg, with the intent being users than adjust the file by hand as desired.
 config:
   base_file: "printer-creality-ender3-v2-2020.cfg" # this is a filename in klipper's config directory to use as your base.
-  #extra_file: ~ # the contents of this file will be *appended* to the base_file.
-  #custom_file_path: ~ # path to a local-to-controller file, which will be templated and used as the entire klipper config
+  extra_file: ~ # the contents of this file will be *appended* to the base_file.
+  custom_file_path: ~ # path to a local-to-controller file, which will be templated and used as the entire klipper config
   overwrite: false # by default, the config file isn't overwritten once it exists
