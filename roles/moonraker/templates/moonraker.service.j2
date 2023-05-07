@@ -9,13 +9,13 @@ WantedBy=multi-user.target
 
 [Service]
 Type=simple
-User={{ common.user_config.username }}
-Group={{ common.user_config.group }}
+User={{ user_config.username }}
+Group={{ user_config.group }}
 RemainAfterExit=yes
-WorkingDirectory={{ common.base_dir }}/moonraker/repo
-ExecStart={{ common.base_dir }}/moonraker/venv/bin/python \
-    {{ common.base_dir }}/moonraker/repo/moonraker/moonraker.py \
-    -d {{ common.base_dir }}/data \
+WorkingDirectory={{ base_dir }}/moonraker/repo
+ExecStart={{ base_dir }}/moonraker/venv/bin/python \
+    {{ base_dir }}/moonraker/repo/moonraker/moonraker.py \
+    -d {{ base_dir }}/data \
     -c {{ moonraker.config_file }} \
     -l {{ log_config.filename }}
 Restart=always

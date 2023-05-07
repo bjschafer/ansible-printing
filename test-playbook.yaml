@@ -5,5 +5,5 @@
     #  become_method: sudo
 
   roles:
-    #    - klipper
+    - klipper
     - moonraker

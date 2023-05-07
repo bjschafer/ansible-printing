@@ -1,6 +1,6 @@
 ---
 - name: Include common role
-  ansible.builtin.import_role:
+  ansible.builtin.include_role:
     name: common
 
 # prereqs
@@ -20,28 +20,28 @@
   ansible.builtin.file:
     state: directory
     path: "{{ item }}"
-    owner: "{{ common.user_config.username }}"
-    group: "{{ common.user_config.group }}"
-    mode: "644"
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+    mode: "775"
   loop:
-    - "{{ common.base_dir }}"
-    - "{{ common.base_dir }}/klipper"
-    - "{{ common.base_dir }}/config"
+    - "{{ base_dir }}"
+    - "{{ base_dir }}/klipper"
+    - "{{ base_dir }}/config"
 
 - name: Clone klipper repo
   ansible.builtin.git: # noqa latest
     repo: "{{ repo_path }}"
-    dest: "{{ common.base_dir }}/klipper/repo"
+    dest: "{{ base_dir }}/klipper/repo"
     update: true
   become: true
-  become_user: "{{ common.user_config.username }}"
+  become_user: "{{ user_config.username }}"
 
 - name: Create virtualenv
   ansible.builtin.pip:
-    virtualenv: "{{ common.base_dir }}/klipper/venv"
-    requirements: "{{ common.base_dir }}/klipper/repo/scripts/klippy-requirements.txt"
+    virtualenv: "{{ base_dir }}/klipper/venv"
+    requirements: "{{ base_dir }}/klipper/repo/scripts/klippy-requirements.txt"
   become: true
-  become_user: "{{ common.user_config.username }}"
+  become_user: "{{ user_config.username }}"
 
 - name: Check for base printer.cfg
   ansible.builtin.stat:
@@ -52,7 +52,7 @@
 - name: Configure basic printer.cfg
   ansible.builtin.template:
     src: klipper.cfg.j2
-    dest: "{{ common.config_file }}"
+    dest: "{{ config_file }}"
     mode: "644"
     force: "{{ config.overwrite }}"
   notify: restart klipper
@@ -64,7 +64,7 @@
 - name: Setup custom printer.cfg
   ansible.builtin.template:
     src: "{{ config.custom_file_path }}"
-    dest: "{{ common.config_file }}"
+    dest: "{{ config_file }}"
     mode: "644"
     force: "{{ config.overwrite }}"
   notify: restart klipper

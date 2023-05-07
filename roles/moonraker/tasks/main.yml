@@ -1,7 +1,7 @@
 ---
 - name: Include common role
-  ansible.builtin.import_role:
-    name: Common
+  ansible.builtin.include_role:
+    name: common
 
 # prereqs
 # TODO split this out based on platform
@@ -15,28 +15,28 @@
   ansible.builtin.file:
     state: directory
     path: "{{ item }}"
-    owner: "{{ common.user_config.username }}"
-    group: "{{ common.user_config.group }}"
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
     mode: "775"
   loop:
-    - "{{ common.base_dir }}"
-    - "{{ common.base_dir }}/moonraker"
-    - "{{ common.base_dir }}/data"
+    - "{{ base_dir }}"
+    - "{{ base_dir }}/moonraker"
+    - "{{ base_dir }}/data"
 
 - name: Clone moonraker repo # noqa latest
   ansible.builtin.git:
     repo: "{{ repo_path }}"
-    dest: "{{ common.base_dir }}/moonraker/repo"
+    dest: "{{ base_dir }}/moonraker/repo"
     update: true
   become: true
   become_user: "{{ user_config.username }}"
 
 - name: Create virtualenv
   ansible.builtin.pip:
-    virtualenv: "{{ common.base_dir }}/moonraker/venv"
-    requirements: "{{ common.base_dir }}/moonraker/repo/scripts/moonraker-requirements.txt"
+    virtualenv: "{{ base_dir }}/moonraker/venv"
+    requirements: "{{ base_dir }}/moonraker/repo/scripts/moonraker-requirements.txt"
   become: true
-  become_user: "{{ common.user_config.username }}"
+  become_user: "{{ user_config.username }}"
 
 - name: Create systemd unit file
   ansible.builtin.template:
@@ -55,14 +55,14 @@
 
 - name: Setup logrotate
   ansible.builtin.include_role:
-    name: Common
+    name: common
     tasks_from: logrotate
 
 - name: Configure moonraker
   ansible.builtin.template:
     src: moonraker.conf.j2
     dest: "{{ moonraker.config_file }}"
-    owner: "{{ common.user_config.username }}"
-    group: "{{ common.user_config.group }}"
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
     mode: "664"
   notify: restart moonraker

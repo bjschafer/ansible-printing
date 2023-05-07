@@ -8,9 +8,5 @@ user_config:
   additional_groups:
     - dialout
 
-log_config:
-  filename: "/var/log/klipper/klippy.log"
-  configure_logrotate: true
-
 # /var/run/$service autocreated by systemd
 uds_path: "/var/run/klipper/klippy.socket"
