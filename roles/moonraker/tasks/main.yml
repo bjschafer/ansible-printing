@@ -10,6 +10,7 @@
     pkg:
       - python3-virtualenv
       - git
+      - libsodium23 # required for moonraker's auth component to load
 
 - name: Create directory structure
   ansible.builtin.file:
@@ -66,3 +67,4 @@
     group: "{{ user_config.group }}"
     mode: "664"
   notify: Restart moonraker
+# TODO moonraker polkit

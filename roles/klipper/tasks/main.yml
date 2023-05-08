@@ -27,6 +27,7 @@
     - "{{ base_dir }}"
     - "{{ base_dir }}/klipper"
     - "{{ base_dir }}/config"
+    - "{{ log_config.filename | dirname }}"
 
 - name: Clone klipper repo
   ansible.builtin.git: # noqa latest
@@ -45,9 +46,21 @@
 
 - name: Check for base printer.cfg
   ansible.builtin.stat:
-    path: "{{ repo_path }}/config/{{ config.base_file }}"
+    path: "{{ base_dir }}/klipper/repo/config/{{ config.base_file }}"
   when: "config.custom_file_path is not defined or not config.custom_file_path"
   register: base_printer_cfg
+  tags:
+    - printer_cfg
+
+- name: Read base printer.cfg file
+  ansible.builtin.slurp:
+    src: "{{ base_printer_cfg.stat.path }}"
+  register: base_printer_cfg_raw
+  when:
+    - "config.custom_file_path is not defined or not config.custom_file_path"
+    - "base_printer_cfg.stat.exists"
+  tags:
+    - printer_cfg
 
 - name: Configure basic printer.cfg
   ansible.builtin.template:
@@ -59,6 +72,8 @@
   when:
     - "config.custom_file_path is not defined or not config.custom_file_path"
     - "base_printer_cfg.stat.exists"
+  tags:
+    - printer_cfg
 
 # FUTURE IMPROVEMENT: permit fetching file from a URL.
 - name: Setup custom printer.cfg
@@ -69,6 +84,8 @@
     force: "{{ config.overwrite }}"
   notify: Restart klipper
   when: "config.custom_file_path is defined and config.custom_file_path"
+  tags:
+    - printer_cfg
 
 - name: Create systemd unit file
   ansible.builtin.template:

@@ -9,6 +9,7 @@
   ansible.builtin.apt:
     pkg:
       - nginx
+      - unzip
 
 - name: Create directory structure
   ansible.builtin.file:
@@ -31,11 +32,12 @@
     user: fluidd-core
     repo: fluidd
     action: latest_release
+  delegate_to: localhost
   register: fluidd_latest_tag
 
 - name: Download latest fluidd release
   ansible.builtin.get_url:
-    url: "https://github.com/fluidd-core/fluidd/releases/download/{{ fluidd_latest_tag }}/fluidd.zip"
+    url: "https://github.com/fluidd-core/fluidd/releases/download/{{ fluidd_latest_tag.tag }}/fluidd.zip"
     dest: "{{ fluidd_download_dir.path }}/fluidd.zip"
     mode: "666"
 
@@ -46,6 +48,12 @@
     remote_src: true
     owner: "{{ user_config.username }}"
     group: "{{ user_config.group }}"
+
+- name: Disable default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
 
 - name: Configure nginx site
   ansible.builtin.template:

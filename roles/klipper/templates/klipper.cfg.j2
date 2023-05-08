@@ -1,7 +1,7 @@
 {%- if config.custom_file_path or config.overwrite %}
 {{ ansible_managed }}
 {%- endif %}
-{% include base_printer_cfg.stat.path %}
+{{ base_printer_cfg_raw.content | b64decode }}
 {%- if config.extra_file %}
 {% include config.extra_file %}
 {%- endif %}

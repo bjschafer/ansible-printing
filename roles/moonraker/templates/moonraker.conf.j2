@@ -6,7 +6,7 @@ klippy_uds_address: {{ uds_path }}
 [authorization]
 trusted_clients:
 {% for ip in moonraker.trusted_client_ips %}
- {{ ip }}
+  {{ ip }}
 {% endfor %}
 cors_domains:
 {% for domain in moonraker.cors_domains %}
