@@ -1,0 +1,73 @@
+---
+- name: Include common role
+  ansible.builtin.include_role:
+    name: common
+
+# prereqs
+# TODO split this out based on platform
+- name: Install packages (ubuntu/debian)
+  ansible.builtin.apt:
+    pkg:
+      - nginx
+
+- name: Create directory structure
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+    mode: "775"
+  loop:
+    - "{{ base_dir }}"
+    - "{{ base_dir }}/fluidd"
+
+- name: Create temp directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: fluidd_download_dir
+
+- name: Find latest fluidd release
+  community.general.github_release:
+    user: fluidd-core
+    repo: fluidd
+    action: latest_release
+  register: fluidd_latest_tag
+
+- name: Download latest fluidd release
+  ansible.builtin.get_url:
+    url: "https://github.com/fluidd-core/fluidd/releases/download/{{ fluidd_latest_tag }}/fluidd.zip"
+    dest: "{{ fluidd_download_dir.path }}/fluidd.zip"
+    mode: "666"
+
+- name: Unpack fluidd
+  ansible.builtin.unarchive:
+    src: "{{ fluidd_download_dir.path }}/fluidd.zip"
+    dest: "{{ base_dir }}/fluidd"
+    remote_src: true
+    owner: "{{ user_config.username }}"
+    group: "{{ user_config.group }}"
+
+- name: Configure nginx site
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/fluidd
+    mode: "644"
+    owner: root
+    group: root
+  notify: Reload nginx
+
+- name: Enable nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/fluidd
+    src: /etc/nginx/sites-available/fluidd
+    state: link
+  notify: Reload nginx
+
+# TODO maybe handle letsencrypt certs. or link out to recommended module
+# TODO webcam shenanigans more than on/off
+
+- name: Enable nginx systemd unit
+  ansible.builtin.systemd:
+    enabled: true
+    name: nginx.service
+  notify: Restart nginx

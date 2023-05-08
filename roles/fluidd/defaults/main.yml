@@ -1,0 +1,6 @@
+---
+nginx:
+  server_name: "_"
+
+webcam:
+  enabled: true
