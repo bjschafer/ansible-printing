@@ -22,10 +22,10 @@
     - "{{ base_dir }}"
     - "{{ base_dir }}/fluidd"
 
-- name: Create temp directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: fluidd_download_dir
+- name: Get current fluidd version
+  ansible.builtin.slurp:
+    src: "{{ base_dir }}/fluidd/.version"
+  register: fluidd_current_version
 
 - name: Find latest fluidd release
   community.general.github_release:
@@ -35,11 +35,22 @@
   delegate_to: localhost
   register: fluidd_latest_tag
 
+- name: Determine if fluidd needs to be upgraded
+  ansible.builtin.set_fact:
+    fluidd_needs_upgrade: "{{ (fluidd_current_version.content | b64decode) != fluidd_latest_tag.tag }}"
+
+- name: Create temp directory
+  ansible.builtin.tempfile:
+    state: directory
+  when: fluidd_needs_upgrade
+  register: fluidd_download_dir
+
 - name: Download latest fluidd release
   ansible.builtin.get_url:
     url: "https://github.com/fluidd-core/fluidd/releases/download/{{ fluidd_latest_tag.tag }}/fluidd.zip"
     dest: "{{ fluidd_download_dir.path }}/fluidd.zip"
     mode: "666"
+  when: fluidd_needs_upgrade
 
 - name: Unpack fluidd
   ansible.builtin.unarchive:
@@ -48,6 +59,7 @@
     remote_src: true
     owner: "{{ user_config.username }}"
     group: "{{ user_config.group }}"
+  when: fluidd_needs_upgrade
 
 - name: Disable default nginx site
   ansible.builtin.file:

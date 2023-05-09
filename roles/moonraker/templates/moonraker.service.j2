@@ -11,6 +11,7 @@ WantedBy=multi-user.target
 Type=simple
 User={{ user_config.username }}
 Group={{ user_config.group }}
+SupplementaryGroups=moonraker-admin
 RemainAfterExit=yes
 WorkingDirectory={{ base_dir }}/moonraker/repo
 ExecStart={{ base_dir }}/moonraker/venv/bin/python \
