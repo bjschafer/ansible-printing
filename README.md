@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 Create a playbook that includes your selection of the `klipper`, `moonraker`, and `fluidd` roles.
 
-Explore the variable in `roles/*/defaults/main.yml`. Sensible defaults are set for many things, but you may
+Explore the variables in `roles/*/defaults/main.yml`. Sensible defaults are set for many things, but you may
 wish to change things to fit your environment.
 
 ## Help, issues, stability

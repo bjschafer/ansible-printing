@@ -25,6 +25,7 @@
     mode: "775"
   loop:
     - "{{ base_dir }}"
+    - "{{ base_dir }}/data/config"
     - "{{ base_dir }}/klipper"
     - "{{ base_dir }}/config"
     - "{{ log_config.filename | dirname }}"

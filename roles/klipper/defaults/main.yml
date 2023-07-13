@@ -11,7 +11,7 @@ repo_path: "https://github.com/klipper3d/klipper.git"
 
 virtual_sdcard_path: "{{ base_dir }}/config/data/sdcard"
 
-# the base setup will configure a super basic printer.cfg, with the intent being users than adjust the file by hand as desired.
+# the base setup will configure a super basic printer.cfg, with the intent being users then adjust the file by hand as desired.
 config:
   base_file: "printer-creality-ender3-v2-2020.cfg" # this is a filename in klipper's config directory to use as your base.
   extra_file: ~ # the contents of this file will be *appended* to the base_file.
