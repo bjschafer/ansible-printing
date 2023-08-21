@@ -1,4 +1,4 @@
 ansible~=8.1.0
 ansible-core~=2.15.1
-ansible-lint~=6.17.2
+ansible-lint~=6.18.0
 github3.py~=4.0.1
